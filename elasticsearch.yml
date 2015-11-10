@@ -95,3 +95,9 @@ network.host: 0.0.0.0
 # Require explicit names when deleting indices:
 #
 # action.destructive_requires_name: true
+
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+index.number_of_shards: 1
+index.number_of_replicas: 0
+

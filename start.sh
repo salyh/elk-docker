@@ -25,13 +25,12 @@ trap _term SIGTERM
 
 
 ## remove pidfiles in case previous graceful termination failed
-# NOTE - This is the reason for the WARNING at the top - it's a bit hackish, 
+# NOTE - This is the reason for the WARNING at the top - it's a bit hackish,
 #   but if it's good enough for Fedora (https://goo.gl/88eyXJ), it's good
 #   enough for me :)
 
 rm -f /var/run/elasticsearch/elasticsearch.pid /var/run/logstash.pid \
   /var/run/kibana4.pid
-
 
 ## start services
 
@@ -48,6 +47,11 @@ while [ ! "$(curl localhost:9200 2> /dev/null)" -a $counter -lt 30  ]; do
 done
 
 service kibana start
+
+echo "Loading demo_nyc"
+## nyc demo
+cat /etc/demo_nyc/nyc_collision_data.csv | /opt/logstash/bin/logstash -f /etc/demo_nyc/nyc_collision_logstash.conf
+echo "Finished demo_nyc"
 
 tail -f /var/log/elasticsearch/elasticsearch.log &
 wait

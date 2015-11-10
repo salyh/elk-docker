@@ -1,5 +1,7 @@
 # Dockerfile for ELK stack
 # Elasticsearch 2.0.0, Logstash 2.0.0, Kibana 4.2.0
+# Original Author: Sebastien Pujadas http://pujadas.net
+#                  https://github.com/spujadas/elk-docker
 
 # Build with:
 # docker build -t <repo-user>/elk .
@@ -7,9 +9,9 @@
 # Run with:
 # docker run -p 5601:5601 -p 9200:9200 -p 5000:5000 -it --name elk <repo-user>/elk
 
-FROM phusion/baseimage
-MAINTAINER Sebastien Pujadas http://pujadas.net
-ENV REFRESHED_AT 2015-11-05
+FROM java:8-jdk
+MAINTAINER Hendrik Saly (codecentric AG)
+ENV REFRESHED_AT 2015-11-10
 
 ###############################################################################
 #                                INSTALLATION
@@ -26,9 +28,12 @@ RUN echo deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable m
 RUN apt-get update -qq \
  && apt-get install -qqy \
 		elasticsearch \
-		openjdk-7-jdk \
  && apt-get clean
 
+### install plugins
+RUN /usr/share/elasticsearch/bin/plugin install license
+RUN /usr/share/elasticsearch/bin/plugin install marvel-agent
+RUN /usr/share/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/2.0
 
 ### install Logstash
 
@@ -62,6 +67,8 @@ RUN mkdir ${KIBANA_HOME} \
  && useradd -r -s /usr/sbin/nologin -d ${KIBANA_HOME} -c "Kibana service user" -g kibana kibana \
  && chown -R kibana:kibana ${KIBANA_HOME}
 
+RUN /opt/kibana/bin/kibana plugin --install elasticsearch/marvel/latest
+
 ADD ./kibana-init /etc/init.d/kibana
 RUN sed -i -e 's#^KIBANA_HOME=$#KIBANA_HOME='$KIBANA_HOME'#' /etc/init.d/kibana \
  && chmod +x /etc/init.d/kibana
@@ -74,7 +81,10 @@ RUN sed -i -e 's#^KIBANA_HOME=$#KIBANA_HOME='$KIBANA_HOME'#' /etc/init.d/kibana 
 ### configure Elasticsearch
 
 ADD ./elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
-
+ADD ./demo_nyc/nyc_collision_data.csv /etc/demo_nyc/nyc_collision_data.csv
+ADD ./demo_nyc/nyc_collision_kibana.json /etc/demo_nyc/nyc_collision_kibana.json
+ADD ./demo_nyc/nyc_collision_logstash.conf /etc/demo_nyc/nyc_collision_logstash.conf
+ADD ./demo_nyc/nyc_collision_template.json /etc/demo_nyc/nyc_collision_template.json
 
 ### configure Logstash
 
