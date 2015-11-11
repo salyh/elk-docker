@@ -34,6 +34,8 @@ rm -f /var/run/elasticsearch/elasticsearch.pid /var/run/logstash.pid \
 
 ## start services
 
+chown -R elasticsearch:elasticsearch /snapshot
+
 service elasticsearch start
 service logstash start
 
@@ -48,6 +50,16 @@ done
 
 service kibana start
 
+curl -XPUT 'http://localhost:9200/_snapshot/elk_backup' -d '{
+    "type": "fs",
+    "settings": {
+        "location": "/snapshot"
+    }
+}'
+
+curl -XPOST 'http://localhost:9200/_snapshot/elk_backup/elk2snap2/_restore'
+
+echo 
 echo "Loading demo_nyc"
 ## nyc demo
 cat /etc/demo_nyc/nyc_collision_data.csv | /opt/logstash/bin/logstash -f /etc/demo_nyc/nyc_collision_logstash.conf
