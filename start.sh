@@ -50,20 +50,24 @@ done
 
 service kibana start
 
-curl -XPUT -s 'http://localhost:9200/_snapshot/elk_backup' -d '{
-    "type": "fs",
-    "settings": {
-        "location": "/snapshot"
-    }
-}'
+if [ ! -f /tmp/elk2_init ]
+then
+  curl -XPUT -s 'http://localhost:9200/_snapshot/elk_backup' -d '{
+      "type": "fs",
+      "settings": {
+          "location": "/snapshot"
+      }
+  }'
 
-curl -XPOST -s 'http://localhost:9200/_snapshot/elk_backup/elk2snap2/_restore'
+  curl -XPOST -s 'http://localhost:9200/_snapshot/elk_backup/elk2snap2/_restore'
 
-echo 
-echo "Loading demo_nyc"
-## nyc demo
-cat /etc/demo_nyc/nyc_collision_data.csv | /opt/logstash/bin/logstash -f /etc/demo_nyc/nyc_collision_logstash.conf
-echo "Finished demo_nyc"
+  echo
+  echo "Loading demo_nyc"
+  ## nyc demo
+  cat /etc/demo_nyc/nyc_collision_data.csv | /opt/logstash/bin/logstash -f /etc/demo_nyc/nyc_collision_logstash.conf
+  touch /tmp/elk2_init
+fi
 
+echo "Started"
 tail -f /var/log/elasticsearch/elasticsearch.log &
 wait
