@@ -50,14 +50,14 @@ done
 
 service kibana start
 
-curl -XPUT 'http://localhost:9200/_snapshot/elk_backup' -d '{
+curl -XPUT -s 'http://localhost:9200/_snapshot/elk_backup' -d '{
     "type": "fs",
     "settings": {
         "location": "/snapshot"
     }
 }'
 
-curl -XPOST 'http://localhost:9200/_snapshot/elk_backup/elk2snap2/_restore'
+curl -XPOST -s 'http://localhost:9200/_snapshot/elk_backup/elk2snap2/_restore'
 
 echo 
 echo "Loading demo_nyc"

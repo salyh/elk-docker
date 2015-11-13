@@ -22,7 +22,7 @@ ENV REFRESHED_AT 2015-11-10
 RUN apt-get update -qq \
  && apt-get install -qqy curl
 
-RUN curl http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
+RUN curl -s http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
 RUN echo deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main > /etc/apt/sources.list.d/elasticsearch-2.x.list
 
 RUN apt-get update -qq \
@@ -41,7 +41,7 @@ ENV LOGSTASH_HOME /opt/logstash
 ENV LOGSTASH_PACKAGE logstash-2.0.0.tar.gz
 
 RUN mkdir ${LOGSTASH_HOME} \
- && curl -O https://download.elasticsearch.org/logstash/logstash/${LOGSTASH_PACKAGE} \
+ && curl -s -O https://download.elasticsearch.org/logstash/logstash/${LOGSTASH_PACKAGE} \
  && tar xzf ${LOGSTASH_PACKAGE} -C ${LOGSTASH_HOME} --strip-components=1 \
  && rm -f ${LOGSTASH_PACKAGE} \
  && groupadd -r logstash \
@@ -60,7 +60,7 @@ ENV KIBANA_HOME /opt/kibana
 ENV KIBANA_PACKAGE kibana-4.2.0-linux-x64.tar.gz
 
 RUN mkdir ${KIBANA_HOME} \
- && curl -O https://download.elasticsearch.org/kibana/kibana/${KIBANA_PACKAGE} \
+ && curl -s -O https://download.elasticsearch.org/kibana/kibana/${KIBANA_PACKAGE} \
  && tar xzf ${KIBANA_PACKAGE} -C ${KIBANA_HOME} --strip-components=1 \
  && rm -f ${KIBANA_PACKAGE} \
  && groupadd -r kibana \
