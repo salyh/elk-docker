@@ -6,12 +6,12 @@ Consists of
 * Logstash 2
 * Kibana 4
 
-and comes bundled with the data from [NY traffic accidents](https://github.com/elastic/examples/tree/master/ELK_nyc_traffic_accidents) 
+and comes bundled with the data from [NY traffic accidents](https://github.com/elastic/examples/tree/master/ELK_nyc_traffic_accidents)
 as a out of the box -ready to use- demo.
 
 ### Use with docker
 
-* ./docker.sh 
+* ./docker.sh or 'docker pull salyh/elk2'
 
 ### Use with vagrant
 
@@ -32,4 +32,3 @@ The data will be indexed live when the container is running for the first time, 
 * [README](docs/index.md)
 * [ELK Docker image documentation web page](http://elk-docker.readthedocs.org/)
 * written by [Sébastien Pujadas](https://pujadas.net), released under the [Apache 2 license](https://www.apache.org/licenses/LICENSE-2.0).
-
