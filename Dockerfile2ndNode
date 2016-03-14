@@ -1,0 +1,45 @@
+FROM java:8-jdk
+MAINTAINER Hendrik Saly (codecentric AG)
+ENV REFRESHED_AT 2016-03-14
+
+###############################################################################
+#                                INSTALLATION
+###############################################################################
+
+### install Elasticsearch
+
+RUN apt-get update -qq \
+ && apt-get install -qqy curl apt-utils net-tools
+
+RUN curl -s http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
+RUN echo deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main > /etc/apt/sources.list.d/elasticsearch-2.x.list
+
+RUN apt-get update -qq \
+ && apt-get install -qqy \
+		elasticsearch=2.0.0 \
+ && apt-get clean
+
+### install plugins
+RUN /usr/share/elasticsearch/bin/plugin install license
+RUN /usr/share/elasticsearch/bin/plugin install marvel-agent
+RUN /usr/share/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/2.0
+
+###############################################################################
+#                               CONFIGURATION
+###############################################################################
+
+### configure Elasticsearch
+
+ADD ./elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+###############################################################################
+#                                   START
+###############################################################################
+
+ADD ./start2ndNode.sh /usr/local/bin/start2ndNode.sh
+RUN chmod +x /usr/local/bin/start2ndNode.sh
+
+EXPOSE 9201 9301
+VOLUME /var/lib/elasticsearch
+ADD snapshot /snapshot
+
+CMD [ "/usr/local/bin/start2ndNode.sh" ]
