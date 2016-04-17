@@ -36,7 +36,13 @@ rm -f /var/run/elasticsearch/elasticsearch.pid /var/run/logstash.pid \
 
 chown -R elasticsearch:elasticsearch /snapshot
 
+update-rc.d elasticsearch defaults 95 10
+update-rc.d logstash defaults 95 10
+update-rc.d kibana defaults 95 10
+
 service elasticsearch start
+
+chown -R logstash:logstash /opt/logstash
 service logstash start
 
 # wait for elasticsearch to start up
@@ -49,6 +55,7 @@ while [ ! "$(curl localhost:9200 2> /dev/null)" -a $counter -lt 30  ]; do
   cat /var/log/elasticsearch/elasticsearch.log
 done
 
+chown -R kibana:kibana /opt/kibana
 service kibana start
 
 if [ ! -f /tmp/elk2_init ]
@@ -70,5 +77,7 @@ then
 fi
 
 echo "Started"
-tail -f /var/log/elasticsearch/elasticsearch.log &
+tail -f /var/log/elasticsearch/* &
+tail -f /var/log/kibana/* &
+tail -f /var/log/logstash/* &
 wait

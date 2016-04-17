@@ -1,5 +1,5 @@
 # Dockerfile for ELK stack
-# Elasticsearch 2.0.0, Logstash 2.0.0, Kibana 4.2.0
+# Elasticsearch 2.3.1, Logstash 2.3.1, Kibana 4.5.0
 # Original Author: Sebastien Pujadas http://pujadas.net
 #                  https://github.com/spujadas/elk-docker
 
@@ -11,7 +11,7 @@
 
 FROM java:8-jdk
 MAINTAINER Hendrik Saly (codecentric AG)
-ENV REFRESHED_AT 2016-03-14
+ENV REFRESHED_AT 2016-04-17
 
 ###############################################################################
 #                                INSTALLATION
@@ -19,60 +19,27 @@ ENV REFRESHED_AT 2016-03-14
 
 ### install Elasticsearch
 
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 RUN apt-get update -qq \
- && apt-get install -qqy curl apt-utils
+ && apt-get install -qqy apt-utils curl net-tools
 
 RUN curl -s http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
-RUN echo deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main > /etc/apt/sources.list.d/elasticsearch-2.x.list
+RUN echo "deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main" | tee -a /etc/apt/sources.list
+RUN echo "deb http://packages.elastic.co/kibana/4.5/debian stable main" | tee -a /etc/apt/sources.list
+RUN echo "deb http://packages.elastic.co/logstash/2.3/debian stable main" | tee -a /etc/apt/sources.list
 
 RUN apt-get update -qq \
  && apt-get install -qqy \
-		elasticsearch=2.0.0 \
+		elasticsearch=2.3.1 kibana=4.5.0 logstash=1:2.3.1-1\
  && apt-get clean
 
 ### install plugins
 RUN /usr/share/elasticsearch/bin/plugin install license
 RUN /usr/share/elasticsearch/bin/plugin install marvel-agent
-RUN /usr/share/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/2.0
-
-### install Logstash
-
-ENV LOGSTASH_HOME /opt/logstash
-ENV LOGSTASH_PACKAGE logstash-2.0.0.tar.gz
-
-RUN mkdir ${LOGSTASH_HOME} \
- && curl -s -O https://download.elasticsearch.org/logstash/logstash/${LOGSTASH_PACKAGE} \
- && tar xzf ${LOGSTASH_PACKAGE} -C ${LOGSTASH_HOME} --strip-components=1 \
- && rm -f ${LOGSTASH_PACKAGE} \
- && groupadd -r logstash \
- && useradd -r -s /usr/sbin/nologin -d ${LOGSTASH_HOME} -c "Logstash service user" -g logstash logstash \
- && mkdir -p /var/log/logstash /etc/logstash/conf.d \
- && chown -R logstash:logstash ${LOGSTASH_HOME} /var/log/logstash
-
-ADD ./logstash-init /etc/init.d/logstash
-RUN sed -i -e 's#^LS_HOME=$#LS_HOME='$LOGSTASH_HOME'#' /etc/init.d/logstash \
- && chmod +x /etc/init.d/logstash
-
-
-### install Kibana
-
-ENV KIBANA_HOME /opt/kibana
-ENV KIBANA_PACKAGE kibana-4.2.0-linux-x64.tar.gz
-
-RUN mkdir ${KIBANA_HOME} \
- && curl -s -O https://download.elasticsearch.org/kibana/kibana/${KIBANA_PACKAGE} \
- && tar xzf ${KIBANA_PACKAGE} -C ${KIBANA_HOME} --strip-components=1 \
- && rm -f ${KIBANA_PACKAGE} \
- && groupadd -r kibana \
- && useradd -r -s /usr/sbin/nologin -d ${KIBANA_HOME} -c "Kibana service user" -g kibana kibana \
- && chown -R kibana:kibana ${KIBANA_HOME}
-
-RUN /opt/kibana/bin/kibana plugin --install elasticsearch/marvel/2.0.0
-
-ADD ./kibana-init /etc/init.d/kibana
-RUN sed -i -e 's#^KIBANA_HOME=$#KIBANA_HOME='$KIBANA_HOME'#' /etc/init.d/kibana \
- && chmod +x /etc/init.d/kibana
-
+RUN /usr/share/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/2.1.2
+RUN /usr/share/elasticsearch/bin/plugin install royrusso/elasticsearch-HQ
+RUN /opt/kibana/bin/kibana plugin --install elasticsearch/marvel/2.3.1
+RUN /opt/kibana/bin/kibana plugin --install elastic/sense
 
 ###############################################################################
 #                               CONFIGURATION

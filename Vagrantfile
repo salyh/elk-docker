@@ -1,12 +1,12 @@
 $script = <<SCRIPT
-docker rm -f elk2
-docker rm -f elk2n2
+docker rm -f elk2 > /dev/null 2>&1
+docker rm -f elk2n2 > /dev/null 2>&1
 
 cd /vagrant
 echo "Build Node 1"
 docker build -t codecentric/elk2 .
 echo "Run Node 1"
-docker run  -d --net=host --restart always -p 127.0.0.1:5601:5601 -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -p 127.0.0.1:5000:5000 -i --name elk2  codecentric/elk2
+docker run -d --net=host --restart always -p 127.0.0.1:5601:5601 -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -p 127.0.0.1:5000:5000 -i --name elk2  codecentric/elk2
 
 echo "Build Node 2"
 docker build -f Dockerfile2ndNode -t codecentric/elk2n2 .
