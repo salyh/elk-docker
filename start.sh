@@ -36,6 +36,7 @@ rm -f /var/run/elasticsearch/elasticsearch.pid /var/run/logstash.pid \
 
 chown -R elasticsearch:elasticsearch /snapshot
 
+update-rc.d topbeat defaults 95 10
 update-rc.d elasticsearch defaults 95 10
 update-rc.d logstash defaults 95 10
 update-rc.d kibana defaults 95 10
@@ -55,8 +56,11 @@ while [ ! "$(curl localhost:9200 2> /dev/null)" -a $counter -lt 30  ]; do
   cat /var/log/elasticsearch/elasticsearch.log
 done
 
+
+
 chown -R kibana:kibana /opt/kibana
 service kibana start
+service topbeat start
 
 if [ ! -f /tmp/elk2_init ]
 then
@@ -75,6 +79,12 @@ then
   cat /etc/demo_nyc/nyc_collision_data.csv | /opt/logstash/bin/logstash -f /etc/demo_nyc/nyc_collision_logstash.conf
   touch /tmp/elk2_init
 fi
+
+cd /opt
+wget https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.1.zip
+unzip beats-dashboards-1.2.1.zip
+cd beats-dashboards-1.2.1
+./load.sh -url "http://localhost:9200"
 
 echo "Started"
 tail -f /var/log/elasticsearch/* &

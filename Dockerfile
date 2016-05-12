@@ -21,25 +21,28 @@ ENV REFRESHED_AT 2016-04-17
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 RUN apt-get update -qq \
- && apt-get install -qqy apt-utils curl net-tools
+ && apt-get install -qqy apt-utils curl net-tools unzip wget
 
 RUN curl -s http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
 RUN echo "deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main" | tee -a /etc/apt/sources.list
 RUN echo "deb http://packages.elastic.co/kibana/4.5/debian stable main" | tee -a /etc/apt/sources.list
 RUN echo "deb http://packages.elastic.co/logstash/2.3/debian stable main" | tee -a /etc/apt/sources.list
+RUN echo "deb http://packages.elastic.co/beats/apt stable main" | tee -a /etc/apt/sources.list
 
 RUN apt-get update -qq \
  && apt-get install -qqy \
-		elasticsearch=2.3.1 kibana=4.5.0 logstash=1:2.3.1-1\
+		elasticsearch=2.3.1 kibana=4.5.0 logstash=1:2.3.1-1 topbeat \
  && apt-get clean
 
 ### install plugins
 RUN /usr/share/elasticsearch/bin/plugin install license
+RUN /usr/share/elasticsearch/bin/plugin install graph
 RUN /usr/share/elasticsearch/bin/plugin install marvel-agent
 RUN /usr/share/elasticsearch/bin/plugin install lmenezes/elasticsearch-kopf/2.1.2
 RUN /usr/share/elasticsearch/bin/plugin install royrusso/elasticsearch-HQ
 RUN /opt/kibana/bin/kibana plugin --install elasticsearch/marvel/2.3.1
 RUN /opt/kibana/bin/kibana plugin --install elastic/sense
+RUN /opt/kibana/bin/kibana plugin --install elasticsearch/graph/latest
 
 ###############################################################################
 #                               CONFIGURATION
